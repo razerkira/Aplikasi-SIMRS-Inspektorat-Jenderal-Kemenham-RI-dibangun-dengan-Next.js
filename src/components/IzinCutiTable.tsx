@@ -1,18 +1,19 @@
-// src/components/SPJTable.tsx
+// src/components/IzinCutiTable.tsx
 "use client";
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { EditSPJ } from "./EditSPJ";
-import { DeleteSPJ } from "./DeleteSPJ";
+import { EditIzinCuti } from "./EditIzinCuti";
+import { DeleteIzinCuti } from "./DeleteIzinCuti";
 
-export interface SPJ {
+export interface IzinCuti {
   id: number;
   created_at: string;
   NIP: string;
   Nama: string;
   Jabatan: string;
+  Pangkat: string;
   UnitKerja: string;
-  DeskripsiKegiatan: string;
+  JenisCuti: string;
   TanggalMulai: string;
   TanggalSelesai: string;
   DokumenURL: string;
@@ -25,18 +26,20 @@ const formatDate = (dateString: string) => {
   });
 };
 
-export function SPJTable({ data, refreshData }: { data: SPJ[], refreshData: () => void }) {
+export function IzinCutiTable({ data, refreshData }: { data: IzinCuti[], refreshData: () => void }) {
   return (
     <div className="overflow-x-auto">
       <Table>
-        <TableCaption>Daftar SPJ Dinas Luar Terbaru</TableCaption>
+        {/* PERBAIKAN: Ganti teks caption */}
+        <TableCaption>Daftar Pengajuan Izin Cuti Terbaru</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>NIP</TableHead>
             <TableHead>Nama</TableHead>
             <TableHead>Jabatan</TableHead>
+            <TableHead>Pangkat (Gol/Ruang)</TableHead>
             <TableHead>Unit Kerja</TableHead>
-            <TableHead>Deskripsi Kegiatan</TableHead>
+            <TableHead>Jenis Cuti</TableHead>
             <TableHead>Tanggal Mulai</TableHead>
             <TableHead>Tanggal Selesai</TableHead>
             <TableHead>Dokumen</TableHead>
@@ -50,8 +53,9 @@ export function SPJTable({ data, refreshData }: { data: SPJ[], refreshData: () =
                 <TableCell>{item.NIP}</TableCell>
                 <TableCell>{item.Nama}</TableCell>
                 <TableCell>{item.Jabatan}</TableCell>
+                <TableCell>{item.Pangkat}</TableCell>
                 <TableCell>{item.UnitKerja}</TableCell>
-                <TableCell>{item.DeskripsiKegiatan}</TableCell>
+                <TableCell>{item.JenisCuti}</TableCell>
                 <TableCell>{formatDate(item.TanggalMulai)}</TableCell>
                 <TableCell>{formatDate(item.TanggalSelesai)}</TableCell>
                 <TableCell>
@@ -61,15 +65,15 @@ export function SPJTable({ data, refreshData }: { data: SPJ[], refreshData: () =
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-2">
-                    <EditSPJ data={item} refreshData={refreshData} />
-                    <DeleteSPJ dataId={item.id} refreshData={refreshData} />
+                    <EditIzinCuti data={item} refreshData={refreshData} />
+                    <DeleteIzinCuti dataId={item.id} refreshData={refreshData} />
                   </div>
                 </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={9} className="text-center">
+              <TableCell colSpan={10} className="text-center">
                 Tidak ada data.
               </TableCell>
             </TableRow>

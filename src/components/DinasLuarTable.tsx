@@ -11,6 +11,7 @@ export interface DinasLuar {
   NIP: string;
   Nama: string;
   Jabatan: string;
+  Pangkat: string; // Tambahkan Pangkat
   UnitKerja: string;
   DeskripsiKegiatan: string;
   TanggalMulai: string;
@@ -35,6 +36,7 @@ export function DinasLuarTable({ data, refreshData }: { data: DinasLuar[], refre
             <TableHead>NIP</TableHead>
             <TableHead>Nama</TableHead>
             <TableHead>Jabatan</TableHead>
+            <TableHead>Pangkat (Gol/Ruang)</TableHead>
             <TableHead>Unit Kerja</TableHead>
             <TableHead>Deskripsi Kegiatan</TableHead>
             <TableHead>Tanggal Mulai</TableHead>
@@ -50,6 +52,7 @@ export function DinasLuarTable({ data, refreshData }: { data: DinasLuar[], refre
                 <TableCell>{item.NIP}</TableCell>
                 <TableCell>{item.Nama}</TableCell>
                 <TableCell>{item.Jabatan}</TableCell>
+                <TableCell>{item.Pangkat}</TableCell>
                 <TableCell>{item.UnitKerja}</TableCell>
                 <TableCell>{item.DeskripsiKegiatan}</TableCell>
                 <TableCell>{formatDate(item.TanggalMulai)}</TableCell>
@@ -69,7 +72,7 @@ export function DinasLuarTable({ data, refreshData }: { data: DinasLuar[], refre
             ))
           ) : (
              <TableRow>
-              <TableCell colSpan={9} className="text-center">
+              <TableCell colSpan={10} className="text-center"> {/* Ubah colSpan */}
                 Tidak ada data.
               </TableCell>
             </TableRow>

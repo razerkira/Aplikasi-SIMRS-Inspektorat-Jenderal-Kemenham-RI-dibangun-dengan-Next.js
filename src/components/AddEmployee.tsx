@@ -14,8 +14,9 @@ export function AddEmployee({ refreshData }: { refreshData: () => void }) {
   const { toast } = useToast();
   const [nip, setNip] = useState("");
   const [nama, setNama] = useState("");
-  const [email, setEmail] = useState(""); // State baru
+  const [email, setEmail] = useState("");
   const [jabatan, setJabatan] = useState("");
+  const [pangkat, setPangkat] = useState(""); // State baru
   const [unitKerja, setUnitKerja] = useState("");
   const [jenisKelamin, setJenisKelamin] = useState("");
   const [open, setOpen] = useState(false);
@@ -23,8 +24,9 @@ export function AddEmployee({ refreshData }: { refreshData: () => void }) {
   const resetForm = () => {
     setNip("");
     setNama("");
-    setEmail(""); // Reset state baru
+    setEmail("");
     setJabatan("");
+    setPangkat(""); // Reset state baru
     setUnitKerja("");
     setJenisKelamin("");
   };
@@ -35,8 +37,9 @@ export function AddEmployee({ refreshData }: { refreshData: () => void }) {
       await addDoc(collection(db, "pegawai"), {
         NIP: nip,
         Nama: nama,
-        email: email, // Kirim state baru
+        email: email,
         Jabatan: jabatan,
+        Pangkat: pangkat, // Kirim state baru
         UnitKerja: unitKerja,
         JenisKelamin: jenisKelamin,
       });
@@ -82,7 +85,6 @@ export function AddEmployee({ refreshData }: { refreshData: () => void }) {
               <label htmlFor="nama" className="text-right">Nama</label>
               <Input id="nama" value={nama} onChange={(e) => setNama(e.target.value)} className="col-span-3" required />
             </div>
-            {/* Input baru untuk email */}
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="email" className="text-right">Email</label>
               <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="col-span-3" required />
@@ -90,6 +92,11 @@ export function AddEmployee({ refreshData }: { refreshData: () => void }) {
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="jabatan" className="text-right">Jabatan</label>
               <Input id="jabatan" value={jabatan} onChange={(e) => setJabatan(e.target.value)} className="col-span-3" required />
+            </div>
+            {/* Input baru untuk Pangkat */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="pangkat" className="text-right">Pangkat</label>
+              <Input id="pangkat" value={pangkat} onChange={(e) => setPangkat(e.target.value)} className="col-span-3" placeholder="Contoh: Penata Muda (III/a)" required />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="unitkerja" className="text-right">Unit Kerja</label>

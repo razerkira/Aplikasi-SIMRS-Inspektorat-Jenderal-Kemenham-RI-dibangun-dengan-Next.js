@@ -2,7 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Users, Plane, FileText, UploadCloud, FileCheck, X, LogOut } from 'lucide-react';
+import { 
+  Users, 
+  Plane, 
+  UploadCloud, 
+  LayoutDashboard, 
+  CalendarOff, 
+  CalendarCheck,
+  X, 
+  LogOut 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -31,12 +40,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { userProfile } = useAuth();
 
   const navItems = [
-    { href: '/', label: 'Manajemen Pegawai', icon: Users, roles: ['admin'] },
+    { href: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin'] }, 
+    { href: '/manajemen-pegawai', label: 'Manajemen Pegawai', icon: Users, roles: ['admin'] }, 
     { href: '/dinas-luar', label: 'Dinas Luar', icon: Plane, roles: ['admin'] },
-    { href: '/spj', label: 'SPJ Dinas Luar', icon: FileText, roles: ['admin'] },
-    // PERUBAHAN DI SINI: Ganti label
+    { href: '/izin-cuti', label: 'Izin Cuti', icon: CalendarOff, roles: ['admin'] },
     { href: '/upload-dokumen', label: 'Upload Dinas Luar', icon: UploadCloud, roles: ['admin', 'user'] },
-    { href: '/upload-spj', label: 'Upload SPJ', icon: FileCheck, roles: ['admin', 'user'] },
+    { href: '/upload-izin-cuti', label: 'Upload Izin Cuti', icon: CalendarCheck, roles: ['admin', 'user'] },
   ];
 
   const visibleNavItems = navItems.filter(item =>
@@ -55,7 +64,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <>
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 z-10 md-hidden ${
+        className={`fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden ${
           isOpen ? 'block' : 'hidden'
         }`}
         onClick={onClose}
@@ -126,4 +135,3 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     </>
   );
 }
-

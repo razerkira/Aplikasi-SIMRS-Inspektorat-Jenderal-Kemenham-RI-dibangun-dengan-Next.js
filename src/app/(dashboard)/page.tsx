@@ -1,80 +1,114 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
+import AdminRouteGuard from "@/components/AdminRouteGuard";
+import StatCard from "@/components/StatCard";
+import BarChartComponent from "@/components/BarChartComponent";
+// 1. Impor ikon baru untuk statistik harian
+import { Users, Plane, CalendarOff, CalendarClock, CalendarPlus } from "lucide-react"; 
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
-import { AddEmployee } from "@/components/AddEmployee";
-import { EmployeeTable, Employee } from "@/components/EmployeeTable";
-import ExportButton from "@/components/ExportButton";
-import AdminRouteGuard from "@/components/AdminRouteGuard";
+import { supabase } from "@/lib/supabaseClient";
 
-export default function Home() {
-  const [employees, setEmployees] = useState<Employee[]>([]);
+export default function DashboardPage() {
+  const [totalPegawai, setTotalPegawai] = useState(0);
+  const [totalDinasLuar, setTotalDinasLuar] = useState(0);
+  const [totalIzinCuti, setTotalIzinCuti] = useState(0);
+  // 2. State baru untuk statistik harian
+  const [dinasLuarHariIni, setDinasLuarHariIni] = useState(0);
+  const [izinCutiHariIni, setIzinCutiHariIni] = useState(0);
+  const [chartData, setChartData] = useState([]); 
   const [loading, setLoading] = useState(true);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const employeeCollection = collection(db, "pegawai");
-      const employeeSnapshot = await getDocs(employeeCollection);
-      const employeeList = employeeSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Employee[];
-      setEmployees(employeeList);
-    } catch (error) {
-      console.error("Gagal mengambil data pegawai:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    const fetchAllStats = async () => {
+      try {
+        // --- Ambil data total (tidak berubah) ---
+        const pegawaiSnapshot = await getDocs(collection(db, "pegawai"));
+        setTotalPegawai(pegawaiSnapshot.size);
 
-  const headers = [
-    { label: "NIP", key: "NIP" },
-    { label: "Nama", key: "Nama" },
-    { label: "Email", key: "email" },
-    { label: "Jabatan", key: "Jabatan" },
-    { label: "Unit Kerja", key: "UnitKerja" },
-    { label: "Jenis Kelamin", key: "JenisKelamin" },
-  ];
+        const { count: dinasLuarCount } = await supabase.from('dokumen_dinas_luar').select('*', { count: 'exact', head: true });
+        setTotalDinasLuar(dinasLuarCount || 0);
 
-  // 1. Siapkan data khusus untuk ekspor
-  const dataForExport = employees.map(emp => ({
-    ...emp,
-    // 2. "Tipu" Excel dengan menambahkan karakter Tab (\t) di depan NIP
-    // Ini akan memaksa Excel untuk memperlakukannya sebagai teks
-    NIP: `\t${emp.NIP}`
-  }));
+        const { count: izinCutiCount } = await supabase.from('dokumen_izin_cuti').select('*', { count: 'exact', head: true });
+        setTotalIzinCuti(izinCutiCount || 0);
+
+        // --- 3. Ambil data untuk statistik harian ---
+        const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+
+        // Hitung Dinas Luar untuk hari ini
+        const { count: dinasLuarTodayCount } = await supabase
+          .from('dokumen_dinas_luar')
+          .select('*', { count: 'exact', head: true })
+          .eq('TanggalMulai', today);
+        setDinasLuarHariIni(dinasLuarTodayCount || 0);
+
+        // Hitung Izin Cuti untuk hari ini
+        const { count: izinCutiTodayCount } = await supabase
+          .from('dokumen_izin_cuti')
+          .select('*', { count: 'exact', head: true })
+          .eq('TanggalMulai', today);
+        setIzinCutiHariIni(izinCutiTodayCount || 0);
+
+
+        // --- Ambil data untuk grafik (tidak berubah) ---
+        const { data: dinasLuarData, error: dinasLuarError } = await supabase.from('dokumen_dinas_luar').select('TanggalMulai');
+        
+        if (dinasLuarError) throw dinasLuarError;
+
+        if (dinasLuarData) {
+          const monthlyCounts = dinasLuarData.reduce((acc, item) => {
+            const month = new Date(item.TanggalMulai).toLocaleString('id-ID', { month: 'short' });
+            acc[month] = (acc[month] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+
+          const formattedChartData = Object.keys(monthlyCounts).map(month => ({
+            month: month,
+            total: monthlyCounts[month],
+          }));
+          setChartData(formattedChartData as any);
+        }
+
+      } catch (error) {
+        console.error("Gagal mengambil data statistik:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllStats();
+  }, []);
 
   return (
     <AdminRouteGuard>
-      <>
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard Manajemen Pegawai Inspektorat Jenderal</h1>
-            <p className="text-gray-500 mt-2">
-              Berikut adalah daftar pegawai yang terdaftar di dalam sistem.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <ExportButton
-              // 3. Gunakan data yang sudah diformat untuk tombol ekspor
-              data={dataForExport}
-              headers={headers}
-              filename="daftar_pegawai.csv"
-            />
-            <AddEmployee refreshData={fetchData} />
-          </div>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-gray-500">
+            Ringkasan analitik untuk seluruh sistem.
+          </p>
         </div>
-
-        <div className="mt-8">
-          {loading ? <p>Memuat data...</p> : <EmployeeTable employees={employees} refreshData={fetchData} />}
-        </div>
-      </>
+        
+        {loading ? (
+          <p>Memuat statistik...</p>
+        ) : (
+          <>
+            {/* 4. Perbarui grid dan tambahkan kartu baru */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+              <StatCard title="Total Pegawai" value={totalPegawai} icon={Users} />
+              <StatCard title="Total Dinas Luar" value={totalDinasLuar} icon={Plane} />
+              <StatCard title="Total Izin Cuti" value={totalIzinCuti} icon={CalendarOff} />
+              <StatCard title="Dinas Luar Hari Ini" value={dinasLuarHariIni} icon={CalendarClock} />
+              <StatCard title="Izin Cuti Hari Ini" value={izinCutiHariIni} icon={CalendarPlus} />
+            </div>
+            
+            <div>
+              <BarChartComponent data={chartData} />
+            </div>
+          </>
+        )}
+      </div>
     </AdminRouteGuard>
   );
 }

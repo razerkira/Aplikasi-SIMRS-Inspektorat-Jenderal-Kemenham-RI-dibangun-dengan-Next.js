@@ -15,8 +15,9 @@ export function EditEmployee({ employee, refreshData }: { employee: Employee, re
   const { toast } = useToast();
   const [nip, setNip] = useState(employee.NIP);
   const [nama, setNama] = useState(employee.Nama);
-  const [email, setEmail] = useState(employee.email); // State baru
+  const [email, setEmail] = useState(employee.email);
   const [jabatan, setJabatan] = useState(employee.Jabatan);
+  const [pangkat, setPangkat] = useState(employee.Pangkat); // State baru
   const [unitKerja, setUnitKerja] = useState(employee.UnitKerja);
   const [jenisKelamin, setJenisKelamin] = useState(employee.JenisKelamin);
   const [open, setOpen] = useState(false);
@@ -28,8 +29,9 @@ export function EditEmployee({ employee, refreshData }: { employee: Employee, re
       await updateDoc(employeeRef, {
         NIP: nip,
         Nama: nama,
-        email: email, // Kirim state baru
+        email: email,
         Jabatan: jabatan,
+        Pangkat: pangkat, // Kirim state baru
         UnitKerja: unitKerja,
         JenisKelamin: jenisKelamin,
       });
@@ -71,7 +73,6 @@ export function EditEmployee({ employee, refreshData }: { employee: Employee, re
               <label htmlFor="nama" className="text-right">Nama</label>
               <Input id="nama" value={nama} onChange={(e) => setNama(e.target.value)} className="col-span-3" required />
             </div>
-            {/* Input baru untuk email */}
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="email" className="text-right">Email</label>
               <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="col-span-3" required />
@@ -79,6 +80,11 @@ export function EditEmployee({ employee, refreshData }: { employee: Employee, re
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="jabatan" className="text-right">Jabatan</label>
               <Input id="jabatan" value={jabatan} onChange={(e) => setJabatan(e.target.value)} className="col-span-3" required />
+            </div>
+            {/* Input baru untuk Pangkat */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="pangkat" className="text-right">Pangkat</label>
+              <Input id="pangkat" value={pangkat} onChange={(e) => setPangkat(e.target.value)} className="col-span-3" placeholder="Contoh: Penata Muda (III/a)" required />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="unitkerja" className="text-right">Unit Kerja</label>

@@ -4,7 +4,7 @@
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EditEmployee } from "./EditEmployee";
 import { DeleteEmployee } from "./DeleteEmployee";
-import CreateUserAccountButton from "./CreateUserAccountButton"; // 1. Impor komponen baru
+import CreateUserAccountButton from "./CreateUserAccountButton";
 
 export interface Employee {
   id: string;
@@ -12,6 +12,7 @@ export interface Employee {
   Nama: string;
   email: string;
   Jabatan: string;
+  Pangkat: string; // Tambahkan Pangkat di sini
   UnitKerja: string;
   JenisKelamin: string;
 }
@@ -27,6 +28,7 @@ export function EmployeeTable({ employees, refreshData }: { employees: Employee[
             <TableHead>Nama</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Jabatan</TableHead>
+            <TableHead>Pangkat (Gol/Ruang)</TableHead> {/* Kolom baru */}
             <TableHead>Unit Kerja</TableHead>
             <TableHead>Jenis Kelamin</TableHead>
             <TableHead>Aksi</TableHead>
@@ -40,14 +42,13 @@ export function EmployeeTable({ employees, refreshData }: { employees: Employee[
                 <TableCell>{employee.Nama}</TableCell>
                 <TableCell>{employee.email}</TableCell>
                 <TableCell>{employee.Jabatan}</TableCell>
+                <TableCell>{employee.Pangkat}</TableCell> {/* Data baru */}
                 <TableCell>{employee.UnitKerja}</TableCell>
                 <TableCell>{employee.JenisKelamin}</TableCell>
                 <TableCell>
-                  {/* Perluas div agar tombol bisa wrap jika layar terlalu kecil */}
                   <div className="flex flex-col sm:flex-row gap-2">
                     <EditEmployee employee={employee} refreshData={refreshData} />
                     <DeleteEmployee employeeId={employee.id} refreshData={refreshData} />
-                    {/* 2. Tambahkan tombol baru di kolom Aksi */}
                     <CreateUserAccountButton employee={employee} />
                   </div>
                 </TableCell>
@@ -55,7 +56,8 @@ export function EmployeeTable({ employees, refreshData }: { employees: Employee[
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={7} className="text-center">
+              {/* Ubah colSpan menjadi 8 */}
+              <TableCell colSpan={8} className="text-center">
                 Tidak ada data.
               </TableCell>
             </TableRow>

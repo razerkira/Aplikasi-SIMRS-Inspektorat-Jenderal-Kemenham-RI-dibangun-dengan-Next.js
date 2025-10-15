@@ -15,6 +15,7 @@ export function EditDinasLuar({ data, refreshData }: { data: DinasLuar, refreshD
   const [nip, setNip] = useState(data.NIP);
   const [nama, setNama] = useState(data.Nama);
   const [jabatan, setJabatan] = useState(data.Jabatan);
+  const [pangkat, setPangkat] = useState(data.Pangkat); // State baru
   const [unitKerja, setUnitKerja] = useState(data.UnitKerja);
   const [deskripsi, setDeskripsi] = useState(data.DeskripsiKegiatan);
   const [tanggalMulai, setTanggalMulai] = useState(data.TanggalMulai);
@@ -27,7 +28,7 @@ export function EditDinasLuar({ data, refreshData }: { data: DinasLuar, refreshD
       const { error } = await supabase
         .from('dokumen_dinas_luar')
         .update({
-          NIP: nip, Nama: nama, Jabatan: jabatan, UnitKerja: unitKerja,
+          NIP: nip, Nama: nama, Jabatan: jabatan, Pangkat: pangkat, UnitKerja: unitKerja,
           DeskripsiKegiatan: deskripsi, TanggalMulai: tanggalMulai, TanggalSelesai: tanggalSelesai,
         })
         .eq('id', data.id);
@@ -64,6 +65,7 @@ export function EditDinasLuar({ data, refreshData }: { data: DinasLuar, refreshD
             <Input placeholder="NIP" value={nip} onChange={(e) => setNip(e.target.value)} required />
             <Input placeholder="Nama" value={nama} onChange={(e) => setNama(e.target.value)} required />
             <Input placeholder="Jabatan" value={jabatan} onChange={(e) => setJabatan(e.target.value)} required />
+            <Input placeholder="Pangkat (Gol/Ruang)" value={pangkat} onChange={(e) => setPangkat(e.target.value)} required />
             <Input placeholder="Unit Kerja" value={unitKerja} onChange={(e) => setUnitKerja(e.target.value)} required />
             <Textarea placeholder="Deskripsi Kegiatan..." value={deskripsi} onChange={(e) => setDeskripsi(e.target.value)} required />
             <div className="grid grid-cols-2 gap-4">

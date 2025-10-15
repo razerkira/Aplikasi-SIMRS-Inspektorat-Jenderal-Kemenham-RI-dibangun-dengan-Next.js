@@ -1,3 +1,4 @@
+// src/components/SupabaseUploadForm.tsx
 "use client";
 
 import { useState } from "react";
@@ -12,6 +13,7 @@ export default function SupabaseUploadForm() {
   const [nip, setNip] = useState("");
   const [nama, setNama] = useState("");
   const [jabatan, setJabatan] = useState("");
+  const [pangkat, setPangkat] = useState(""); // State baru
   const [unitKerja, setUnitKerja] = useState("");
   const [deskripsi, setDeskripsi] = useState("");
   const [tanggalMulai, setTanggalMulai] = useState("");
@@ -63,6 +65,7 @@ export default function SupabaseUploadForm() {
           NIP: nip,
           Nama: nama,
           Jabatan: jabatan,
+          Pangkat: pangkat, // Kirim state baru
           UnitKerja: unitKerja,
           DeskripsiKegiatan: deskripsi,
           TanggalMulai: tanggalMulai,
@@ -95,8 +98,9 @@ export default function SupabaseUploadForm() {
           <Input placeholder="NIP" value={nip} onChange={(e) => setNip(e.target.value)} required />
           <Input placeholder="Nama" value={nama} onChange={(e) => setNama(e.target.value)} required />
           <Input placeholder="Jabatan" value={jabatan} onChange={(e) => setJabatan(e.target.value)} required />
+          {/* PERBAIKAN: Tambahkan input Pangkat di sini */}
+          <Input placeholder="Pangkat (Gol/Ruang)" value={pangkat} onChange={(e) => setPangkat(e.target.value)} required />
           <Input placeholder="Unit Kerja" value={unitKerja} onChange={(e) => setUnitKerja(e.target.value)} required />
-          {/* PERUBAHAN DI SINI: Ganti placeholder */}
           <Textarea placeholder="Deskripsi Kegiatan Dinas Luar..." value={deskripsi} onChange={(e) => setDeskripsi(e.target.value)} required />
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -117,7 +121,6 @@ export default function SupabaseUploadForm() {
           </div>
 
           <div className="pt-2">
-            {/* PERUBAHAN DI SINI: Ganti teks tombol */}
             <Button type="submit" disabled={uploading} className="w-full">
               {uploading ? <Spinner /> : "Submit Dokumen Dinas Luar"}
             </Button>
