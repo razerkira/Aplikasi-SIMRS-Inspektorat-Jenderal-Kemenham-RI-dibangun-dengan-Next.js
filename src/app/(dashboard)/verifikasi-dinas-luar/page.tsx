@@ -8,6 +8,9 @@ import { DinasLuar } from "@/components/DinasLuarTable"; // Kita gunakan lagi in
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import RejectDialog from "@/components/RejectDialog";
+import PaginationControls from "@/components/PaginationControls";
+import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/useDebounce";
 
 // Komponen Tabel Verifikasi
 function VerificationTable({ data, refreshData }: { data: DinasLuar[], refreshData: () => void }) {
@@ -30,18 +33,22 @@ function VerificationTable({ data, refreshData }: { data: DinasLuar[], refreshDa
     }
   };
 
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString("id-ID");
+  const formatDateRange = (start: string, end: string) => {
+    const startDate = new Date(start).toLocaleDateString("id-ID");
+    const endDate = new Date(end).toLocaleDateString("id-ID");
+    return `${startDate} - ${endDate}`;
+  };
 
   return (
     <div className="overflow-x-auto border rounded-lg">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Pengaju</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deskripsi</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dokumen</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Nama Pengaju</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Deskripsi</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Tanggal</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Dokumen</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Aksi</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -50,7 +57,7 @@ function VerificationTable({ data, refreshData }: { data: DinasLuar[], refreshDa
               <tr key={item.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.Nama}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{item.DeskripsiKegiatan}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(item.TanggalMulai)}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateRange(item.TanggalMulai, item.TanggalSelesai)}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <a href={item.DokumenURL} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                     Lihat
@@ -79,25 +86,54 @@ function VerificationTable({ data, refreshData }: { data: DinasLuar[], refreshDa
 export default function VerifikasiDinasLuarPage() {
   const [submissions, setSubmissions] = useState<DinasLuar[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const itemsPerPage = 10;
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (page = 1, search = "") => {
     setLoading(true);
-    const { data, error } = await supabase
+    const from = (page - 1) * itemsPerPage;
+    const to = from + itemsPerPage - 1;
+
+    let query = supabase
       .from('dokumen_dinas_luar')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('status_verifikator', 'Menunggu'); // Ambil hanya yang statusnya 'Menunggu'
+
+    if (search) {
+      query = query.ilike('Nama', `%${search}%`);
+    }
+
+    const { data, error, count } = await query.range(from, to);
 
     if (error) {
       console.error("Gagal mengambil data verifikasi:", error);
+      setSubmissions([]);
     } else if (data) {
       setSubmissions(data as DinasLuar[]);
+      setTotalItems(count || 0);
+      setTotalPages(Math.ceil((count || 0) / itemsPerPage));
     }
     setLoading(false);
-  }, []);
+  }, [itemsPerPage]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (currentPage !== 1) setCurrentPage(1);
+    fetchData(1, debouncedSearchTerm);
+  }, [fetchData, debouncedSearchTerm]);
+
+  useEffect(() => {
+    if (currentPage > 1) {
+      fetchData(currentPage, debouncedSearchTerm);
+    }
+  }, [currentPage]);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
 
   return (
     <div className="space-y-6">
@@ -107,9 +143,30 @@ export default function VerifikasiDinasLuarPage() {
           Setujui atau tolak pengajuan yang masuk dari pegawai.
         </p>
       </div>
+
+      <div className="max-w-sm">
+        <Input
+          placeholder="Cari berdasarkan nama pengaju..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       
       <div>
-        {loading ? <p>Memuat pengajuan...</p> : <VerificationTable data={submissions} refreshData={fetchData} />}
+        {loading ? (
+          <p>Memuat pengajuan...</p>
+        ) : (
+          <>
+            <VerificationTable data={submissions} refreshData={() => fetchData(currentPage, debouncedSearchTerm)} />
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+            />
+          </>
+        )}
       </div>
     </div>
   );

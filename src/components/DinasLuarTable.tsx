@@ -24,11 +24,10 @@ export interface DinasLuar {
   alasan_penolakan_supervisor: string | null;
 }
 
-const formatDate = (dateString: string) => {
-  if (!dateString) return "N/A";
-  return new Date(dateString).toLocaleDateString("id-ID", {
-    day: 'numeric', month: 'long', year: 'numeric'
-  });
+const formatDateRange = (start: string, end: string) => {
+  const startDate = new Date(start).toLocaleDateString("id-ID");
+  const endDate = new Date(end).toLocaleDateString("id-ID");
+  return `${startDate} - ${endDate}`;
 };
 
 export function DinasLuarTable({ data, refreshData }: { data: DinasLuar[], refreshData: () => void }) {
@@ -44,8 +43,7 @@ export function DinasLuarTable({ data, refreshData }: { data: DinasLuar[], refre
             <TableHead>Pangkat (Gol/Ruang)</TableHead>
             <TableHead>Unit Kerja</TableHead>
             <TableHead>Deskripsi Kegiatan</TableHead>
-            <TableHead>Tanggal Mulai</TableHead>
-            <TableHead>Tanggal Selesai</TableHead>
+            <TableHead>Tanggal</TableHead>
             <TableHead>Dokumen</TableHead>
             <TableHead>Aksi</TableHead>
           </TableRow>
@@ -60,8 +58,7 @@ export function DinasLuarTable({ data, refreshData }: { data: DinasLuar[], refre
                 <TableCell>{item.Pangkat}</TableCell>
                 <TableCell>{item.UnitKerja}</TableCell>
                 <TableCell>{item.DeskripsiKegiatan}</TableCell>
-                <TableCell>{formatDate(item.TanggalMulai)}</TableCell>
-                <TableCell>{formatDate(item.TanggalSelesai)}</TableCell>
+                <TableCell>{formatDateRange(item.TanggalMulai, item.TanggalSelesai)}</TableCell>
                 <TableCell>
                   <a href={item.DokumenURL} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                     Lihat Dokumen
@@ -77,7 +74,7 @@ export function DinasLuarTable({ data, refreshData }: { data: DinasLuar[], refre
             ))
           ) : (
              <TableRow>
-              <TableCell colSpan={10} className="text-center">
+              <TableCell colSpan={9} className="text-center">
                 Tidak ada data.
               </TableCell>
             </TableRow>

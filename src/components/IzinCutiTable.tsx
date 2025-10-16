@@ -25,11 +25,10 @@ export interface IzinCuti {
   alasan_penolakan_supervisor: string | null;
 }
 
-const formatDate = (dateString: string) => {
-  if (!dateString) return "N/A";
-  return new Date(dateString).toLocaleDateString("id-ID", {
-    day: 'numeric', month: 'long', year: 'numeric'
-  });
+const formatDateRange = (start: string, end: string) => {
+  const startDate = new Date(start).toLocaleDateString("id-ID");
+  const endDate = new Date(end).toLocaleDateString("id-ID");
+  return `${startDate} - ${endDate}`;
 };
 
 export function IzinCutiTable({ data, refreshData }: { data: IzinCuti[], refreshData: () => void }) {
@@ -45,9 +44,8 @@ export function IzinCutiTable({ data, refreshData }: { data: IzinCuti[], refresh
             <TableHead>Pangkat (Gol/Ruang)</TableHead>
             <TableHead>Unit Kerja</TableHead>
             <TableHead>Jenis Cuti</TableHead>
-            <TableHead>Tanggal Mulai</TableHead>
-            <TableHead>Tanggal Selesai</TableHead>
-            <TableHead>Dokumen</TableHead>
+            <TableHead>Tanggal</TableHead>
+            <TableHead>Dokumen</TableHead>            
             <TableHead>Aksi</TableHead>
           </TableRow>
         </TableHeader>
@@ -61,8 +59,7 @@ export function IzinCutiTable({ data, refreshData }: { data: IzinCuti[], refresh
                 <TableCell>{item.Pangkat}</TableCell>
                 <TableCell>{item.UnitKerja}</TableCell>
                 <TableCell>{item.JenisCuti}</TableCell>
-                <TableCell>{formatDate(item.TanggalMulai)}</TableCell>
-                <TableCell>{formatDate(item.TanggalSelesai)}</TableCell>
+                <TableCell>{formatDateRange(item.TanggalMulai, item.TanggalSelesai)}</TableCell>                
                 <TableCell>
                   <a href={item.DokumenURL} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                     Lihat Dokumen

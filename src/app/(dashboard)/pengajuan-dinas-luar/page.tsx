@@ -1,4 +1,4 @@
-// src/app/(dashboard)/pengajuan-dinas-luar/page.tsx
+// c:/Users/User58/Documents/dashboard-pegawai/Aplikasi-SIMRS-Inspektorat-Jenderal-Kemenham-RI-dibangun-dengan-Next.js/src/app/(dashboard)/pengajuan-dinas-luar/page.tsx
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { DinasLuar } from "@/components/DinasLuarTable";
+import PaginationControls from "@/components/PaginationControls";
 
 function StatusBadge({ status }: { status: string | null }) {
   const baseClasses = "px-2 py-1 text-xs font-semibold rounded-full inline-block";
@@ -20,12 +21,11 @@ function StatusBadge({ status }: { status: string | null }) {
   return <span className={`${baseClasses} bg-yellow-100 text-yellow-800`}>{status || 'Menunggu'}</span>;
 }
 
-function MySubmissionsTable({ data }: { data: DinasLuar[] }) {
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("id-ID", {
-      day: 'numeric', month: 'long', year: 'numeric'
-    });
+function MyDinasLuarSubmissionsTable({ data }: { data: DinasLuar[] }) {
+  const formatDateRange = (start: string, end: string) => {
+    const startDate = new Date(start).toLocaleDateString("id-ID");
+    const endDate = new Date(end).toLocaleDateString("id-ID");
+    return `${startDate} - ${endDate}`;
   };
 
   return (
@@ -33,11 +33,11 @@ function MySubmissionsTable({ data }: { data: DinasLuar[] }) {
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi Kegiatan</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Mulai</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status Verifikator</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status Supervisor</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dokumen</th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500">Deskripsi Kegiatan</th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500">Tanggal Pengajuan</th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500">Status Verifikator</th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500">Status Supervisor</th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500">Dokumen</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -45,27 +45,9 @@ function MySubmissionsTable({ data }: { data: DinasLuar[] }) {
             data.map((item) => (
               <tr key={item.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.DeskripsiKegiatan}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(item.TanggalMulai)}</td>
-                <td className="px-6 py-4 align-top text-sm">
-                  <div>
-                    <StatusBadge status={item.status_verifikator} />
-                    {item.status_verifikator === 'Ditolak' && item.alasan_penolakan_verifikator && (
-                      <p className="text-xs text-red-600 mt-1 max-w-xs whitespace-normal">
-                        Alasan: {item.alasan_penolakan_verifikator}
-                      </p>
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-4 align-top text-sm">
-                  <div>
-                    <StatusBadge status={item.status_supervisor} />
-                    {item.status_supervisor === 'Ditolak' && item.alasan_penolakan_supervisor && (
-                      <p className="text-xs text-red-600 mt-1 max-w-xs whitespace-normal">
-                        Alasan: {item.alasan_penolakan_supervisor}
-                      </p>
-                    )}
-                  </div>
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateRange(item.TanggalMulai, item.TanggalSelesai)}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm"><StatusBadge status={item.status_verifikator} /></td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm"><StatusBadge status={item.status_supervisor} /></td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <a href={item.DokumenURL} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                     Lihat
@@ -76,7 +58,7 @@ function MySubmissionsTable({ data }: { data: DinasLuar[] }) {
           ) : (
             <tr>
               <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
-                Anda belum memiliki pengajuan.
+                Anda belum memiliki pengajuan dinas luar.
               </td>
             </tr>
           )}
@@ -90,30 +72,45 @@ export default function PengajuanDinasLuarPage() {
   const { user } = useAuth();
   const [myData, setMyData] = useState<DinasLuar[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const itemsPerPage = 10;
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (page = 1) => {
     if (!user) return;
     setLoading(true);
+    const from = (page - 1) * itemsPerPage;
+    const to = from + itemsPerPage - 1;
     
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from('dokumen_dinas_luar')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('user_id', user.uid)
-      .order('id', { ascending: false });
+      .order('id', { ascending: false })
+      .range(from, to);
 
     if (error) {
-      console.error("Gagal mengambil data pengajuan:", error);
+      console.error("Gagal mengambil data pengajuan dinas luar:", error);
+      setMyData([]);
     } else if (data) {
       setMyData(data as DinasLuar[]);
+      const totalCount = count || 0;
+      setTotalItems(totalCount);
+      setTotalPages(Math.ceil(totalCount / itemsPerPage));
     }
     setLoading(false);
-  }, [user]);
+  }, [user, itemsPerPage]);
 
   useEffect(() => {
     if (user) {
-      fetchData();
+      fetchData(currentPage);
     }
-  }, [user, fetchData]);
+  }, [user, fetchData, currentPage]);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
 
   return (
     <div className="space-y-6">
@@ -124,16 +121,29 @@ export default function PengajuanDinasLuarPage() {
             Lihat status semua pengajuan dinas luar yang telah Anda buat.
           </p>
         </div>
-        <Link href="/upload-dokumen" passHref>
+        <Link href="/upload-dinas-luar" passHref>
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Buat Pengajuan Baru
+            Buat Pengajuan Dinas Baru
           </Button>
         </Link>
       </div>
-      
+
       <div>
-        {loading ? <p>Memuat pengajuan...</p> : <MySubmissionsTable data={myData} />}
+        {loading ? (
+          <p>Memuat pengajuan...</p>
+        ) : (
+          <>
+            <MyDinasLuarSubmissionsTable data={myData} />
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+            />
+          </>
+        )}
       </div>
     </div>
   );
