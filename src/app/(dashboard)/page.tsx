@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import AdminRouteGuard from "@/components/AdminRouteGuard";
 import StatCard from "@/components/StatCard";
 import BarChartComponent from "@/components/BarChartComponent";
 // 1. Impor ikon baru untuk statistik harian
@@ -80,35 +79,31 @@ export default function DashboardPage() {
     fetchAllStats();
   }, []);
 
-  return (
-    <AdminRouteGuard>
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-gray-500">
-            Ringkasan analitik untuk seluruh sistem.
-          </p>
+  return <div className="space-y-8">
+    <div>
+      <h1 className="text-3xl font-bold">Dashboard</h1>
+      <p className="text-gray-500">
+        Ringkasan analitik untuk seluruh sistem.
+      </p>
+    </div>
+    
+    {loading ? (
+      <p>Memuat statistik...</p>
+    ) : (
+      <>
+        {/* 4. Perbarui grid dan tambahkan kartu baru */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          <StatCard title="Total Pegawai" value={totalPegawai} icon={Users} />
+          <StatCard title="Total Dinas Luar" value={totalDinasLuar} icon={Plane} />
+          <StatCard title="Total Izin Cuti" value={totalIzinCuti} icon={CalendarOff} />
+          <StatCard title="Dinas Luar Hari Ini" value={dinasLuarHariIni} icon={CalendarClock} />
+          <StatCard title="Izin Cuti Hari Ini" value={izinCutiHariIni} icon={CalendarPlus} />
         </div>
         
-        {loading ? (
-          <p>Memuat statistik...</p>
-        ) : (
-          <>
-            {/* 4. Perbarui grid dan tambahkan kartu baru */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-              <StatCard title="Total Pegawai" value={totalPegawai} icon={Users} />
-              <StatCard title="Total Dinas Luar" value={totalDinasLuar} icon={Plane} />
-              <StatCard title="Total Izin Cuti" value={totalIzinCuti} icon={CalendarOff} />
-              <StatCard title="Dinas Luar Hari Ini" value={dinasLuarHariIni} icon={CalendarClock} />
-              <StatCard title="Izin Cuti Hari Ini" value={izinCutiHariIni} icon={CalendarPlus} />
-            </div>
-            
-            <div>
-              <BarChartComponent data={chartData} />
-            </div>
-          </>
-        )}
-      </div>
-    </AdminRouteGuard>
-  );
+        <div>
+          <BarChartComponent data={chartData} />
+        </div>
+      </>
+    )}
+  </div>;
 }

@@ -44,11 +44,7 @@ export default function LoginPage() {
       if (userDocSnap.exists()) {
         const userProfile = userDocSnap.data();
         // Lakukan redirect berdasarkan peran
-        if (userProfile.role === 'admin') {
-          router.push("/"); // Admin ke Dashboard utama
-        } else {
-          router.push("/pengajuan-dinas-luar"); // User ke halaman pengajuan
-        }
+        router.push("/"); // Arahkan semua role ke Dashboard utama
       } else {
         // Fallback jika profil tidak ditemukan
         throw new Error("Profil pengguna tidak ditemukan.");

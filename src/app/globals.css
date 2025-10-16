@@ -6,20 +6,20 @@
 
 @layer base {
   :root {
-    --background: 240 0% 96%; /* #F4F4F4 - Cream White */
-    --foreground: 200 20% 27%; /* #344955 - Charcoal */
+    --background: 220 13% 95%; /* #F0F2F5 - Cool Light Gray */
+    --foreground: 222 47% 11%; /* #111827 - Dark Blue-Black */
 
-    --card: 240 0% 96%; /* Sama dengan background */
-    --card-foreground: 200 20% 27%; /* Sama dengan foreground */
+    --card: 0 0% 100%; /* #FFFFFF - White */
+    --card-foreground: 222 47% 11%; /* #111827 - Dark Blue-Black */
  
-    --popover: 240 0% 96%;
-    --popover-foreground: 200 20% 27%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
  
-    --primary: 200 22% 37%; /* #4A6572 - Slate Blue */
-    --primary-foreground: 210 40% 98%; /* Teks putih untuk tombol primary */
+    --primary: 217 91% 60%; /* #2563EB - Vibrant Blue */
+    --primary-foreground: 210 40% 98%;
  
-    --secondary: 38 93% 60%; /* #F9AA33 - Warm Orange */
-    --secondary-foreground: 200 20% 27%; /* Teks gelap untuk tombol secondary */
+    --secondary: 210 40% 96.1%; /* #F1F5F9 - Light Gray Blue */
+    --secondary-foreground: 222 47% 11%;
  
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
@@ -27,12 +27,12 @@
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
  
-    --destructive: 0 72% 67%; /* #E57373 - Soft Red */
-    --destructive-foreground: 210 40% 98%; /* Teks putih untuk tombol destructive */
+    --destructive: 0 84.2% 60.2%; /* #EF4444 - Red */
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%; /* #D1D5DB - Light Grey */
+    --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 200 22% 37%; /* Slate Blue untuk focus ring */
+    --ring: 217 91% 60%; /* Vibrant Blue untuk focus ring */
  
     --radius: 0.5rem;
   }

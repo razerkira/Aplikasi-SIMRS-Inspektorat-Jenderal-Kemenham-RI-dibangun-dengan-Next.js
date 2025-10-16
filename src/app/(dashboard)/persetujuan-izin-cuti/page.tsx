@@ -143,7 +143,7 @@ export default function PersetujuanIzinCutiPage() {
         </p>
       </div>
 
-      <div className="max-w-sm">
+      <div>
         <Input
           placeholder="Cari berdasarkan nama pengaju..."
           value={searchTerm}

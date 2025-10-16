@@ -6,20 +6,13 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, AlertCircle, FileText } from "lucide-react";
 import { IzinCuti } from "@/components/IzinCutiTable"; // Impor interface dari tabel yang benar
 import PaginationControls from "@/components/PaginationControls";
-
-function StatusBadge({ status }: { status: string | null }) {
-  const baseClasses = "px-2 py-1 text-xs font-semibold rounded-full inline-block";
-  if (status === 'Disetujui') {
-    return <span className={`${baseClasses} bg-green-100 text-green-800`}>{status}</span>;
-  }
-  if (status === 'Ditolak') {
-    return <span className={`${baseClasses} bg-red-100 text-red-800`}>{status}</span>;
-  }
-  return <span className={`${baseClasses} bg-yellow-100 text-yellow-800`}>{status || 'Menunggu'}</span>;
-}
+import StatusBadge from "@/components/StatusBadge";
+import Skeleton from "@/components/Skeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 function MyIzinCutiSubmissionsTable({ data }: { data: IzinCuti[] }) {
   const formatDateRange = (start: string, end: string) => {
@@ -29,42 +22,49 @@ function MyIzinCutiSubmissionsTable({ data }: { data: IzinCuti[] }) {
   };
 
   return (
-    <div className="overflow-x-auto border rounded-lg">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500">Jenis Cuti</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500">Tanggal Pengajuan</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500">Status Verifikator</th>
-            <th scope="col" className="px-6 py-3 text-xs font-medium text-gray-500">Status Supervisor</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500">Dokumen</th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+    <Card>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Jenis Cuti</TableHead>
+              <TableHead>Tanggal Pengajuan</TableHead>
+              <TableHead>Status Verifikator</TableHead>
+              <TableHead>Status Supervisor</TableHead>
+              <TableHead className="text-right">Dokumen</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
           {data.length > 0 ? (
             data.map((item) => (
-              <tr key={item.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.JenisCuti}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateRange(item.TanggalMulai, item.TanggalSelesai)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm"><StatusBadge status={item.status_verifikator} /></td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm"><StatusBadge status={item.status_supervisor} /></td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <a href={item.DokumenURL} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                    Lihat
-                  </a>
-                </td>
-              </tr>
+              <TableRow key={item.id} className="hover:bg-gray-50">
+                <TableCell className="font-medium">{item.JenisCuti}</TableCell>
+                <TableCell>{formatDateRange(item.TanggalMulai, item.TanggalSelesai)}</TableCell>
+                <TableCell><StatusBadge status={item.status_verifikator} /></TableCell>
+                <TableCell><StatusBadge status={item.status_supervisor} /></TableCell>
+                <TableCell className="text-right">
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={item.DokumenURL} target="_blank" rel="noopener noreferrer">
+                      <FileText className="mr-2 h-4 w-4" /> Lihat
+                    </a>
+                  </Button>
+                </TableCell>
+              </TableRow>
             ))
           ) : (
-            <tr>
-              <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
-                Anda belum memiliki pengajuan izin cuti.
-              </td>
-            </tr>
+            <TableRow>
+              <TableCell colSpan={5} className="h-24 text-center">
+                <div className="flex flex-col items-center justify-center gap-2 text-gray-500">
+                  <AlertCircle className="h-8 w-8" />
+                  <p>Anda belum memiliki pengajuan izin cuti.</p>
+                </div>
+              </TableCell>
+            </TableRow>
           )}
-        </tbody>
-      </table>
-    </div>
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -113,39 +113,47 @@ export default function PengajuanIzinCutiPage() {
     setCurrentPage(newPage);
   };
 
+  const renderSkeletons = () => (
+    <div className="space-y-2">
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} className="h-12 w-full" />
+      ))}
+    </div>
+  );
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Pengajuan Izin Cuti Saya</h1>
-          <p className="text-gray-500 mt-2">
+    <main className="flex flex-1 flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div className="grid gap-1">
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent">
+            Pengajuan Izin Cuti Saya
+          </h1>
+          <p className="text-muted-foreground">
             Lihat status semua pengajuan izin cuti yang telah Anda buat.
           </p>
         </div>
         <Link href="/upload-izin-cuti" passHref>
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Buat Pengajuan Cuti Baru
+            Buat Pengajuan Baru
           </Button>
         </Link>
       </div>
 
-      <div>
-        {loading ? (
-          <p>Memuat pengajuan...</p>
-        ) : (
-          <>
-            <MyIzinCutiSubmissionsTable data={myData} />
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-              totalItems={totalItems}
-              itemsPerPage={itemsPerPage}
-            />
-          </>
-        )}
-      </div>
-    </div>
+      <Card>
+        <CardContent className="pt-6">
+          {loading ? renderSkeletons() : <MyIzinCutiSubmissionsTable data={myData} />}
+        </CardContent>
+      </Card>
+      {!loading && totalPages > 1 && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          totalItems={totalItems}
+          itemsPerPage={itemsPerPage}
+        />
+      )}
+    </main>
   );
 }

@@ -1,18 +1,21 @@
-// src/app/layout.tsx
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthContextProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
+import { AuthContextProvider } from "@/context/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'SIMRS Kemenham RI',
-  description: 'Smart Integrated Management Reporting System',
-}
+  title: "SIMRS Itjen Kemenham",
+  description: "Sistem Informasi Manajemen Itjen Kemenham",
+};
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en">
       <body className={inter.className}>

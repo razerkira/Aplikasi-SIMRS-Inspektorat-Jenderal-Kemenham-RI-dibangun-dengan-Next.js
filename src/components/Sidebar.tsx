@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   UserCheck, // Ikon baru untuk persetujuan
   X, 
+  ClipboardList, // Ikon baru untuk aktivitas harian
   LogOut 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -41,29 +42,44 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const router = useRouter();
   const { userProfile } = useAuth();
 
-  const navItems = [
-    // --- Menu Admin ---
-    { href: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin'] }, 
-    { href: '/manajemen-pegawai', label: 'Manajemen Pegawai', icon: Users, roles: ['admin'] }, 
-    { href: '/dinas-luar', label: 'Dinas Luar', icon: Plane, roles: ['admin'] },
-    { href: '/izin-cuti', label: 'Izin Cuti', icon: CalendarOff, roles: ['admin'] },
-
-    // --- Menu Verifikasi ---
-    { href: '/verifikasi-dinas-luar', label: 'Verifikasi Dinas Luar', icon: ShieldCheck, roles: ['verificator', 'admin'] },
-    { href: '/verifikasi-izin-cuti', label: 'Verifikasi Izin Cuti', icon: ShieldCheck, roles: ['verificator', 'admin'] },
-
-    // --- Menu Persetujuan ---
-    { href: '/persetujuan-dinas-luar', label: 'Persetujuan Dinas Luar', icon: UserCheck, roles: ['supervisor', 'admin'] },
-    { href: '/persetujuan-izin-cuti', label: 'Persetujuan Izin Cuti', icon: UserCheck, roles: ['supervisor', 'admin'] },
-
-    // --- Menu User ---
-    { href: '/pengajuan-dinas-luar', label: 'Pengajuan Dinas Luar', icon: UploadCloud, roles: ['user', 'admin'] },
-    { href: '/pengajuan-izin-cuti', label: 'Pengajuan Izin Cuti', icon: CalendarCheck, roles: ['user', 'admin'] },
+  const navGroups = [
+    {
+      title: 'MENU UTAMA',
+      items: [
+        { href: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'supervisor', 'verificator', 'user'] },
+        { href: '/aktivitas-harian', label: 'Aktivitas Harian', icon: ClipboardList, roles: ['admin', 'supervisor', 'verificator', 'user'] },
+      ]
+    },
+    {
+      title: 'ADMIN',
+      items: [
+        { href: '/manajemen-pegawai', label: 'Manajemen Pegawai', icon: Users, roles: ['admin'] },
+        { href: '/dinas-luar', label: 'Dinas Luar', icon: Plane, roles: ['admin'] },
+        { href: '/izin-cuti', label: 'Izin Cuti', icon: CalendarOff, roles: ['admin'] },
+      ]
+    },
+    {
+      title: 'VERIFIKASI',
+      items: [
+        { href: '/verifikasi-dinas-luar', label: 'Verifikasi Dinas Luar', icon: ShieldCheck, roles: ['verificator', 'admin'] },
+        { href: '/verifikasi-izin-cuti', label: 'Verifikasi Izin Cuti', icon: ShieldCheck, roles: ['verificator', 'admin'] },
+      ]
+    },
+    {
+      title: 'PERSETUJUAN',
+      items: [
+        { href: '/persetujuan-dinas-luar', label: 'Persetujuan Dinas Luar', icon: UserCheck, roles: ['supervisor', 'admin'] },
+        { href: '/persetujuan-izin-cuti', label: 'Persetujuan Izin Cuti', icon: UserCheck, roles: ['supervisor', 'admin'] },
+      ]
+    },
+    {
+      title: 'PENGAJUAN',
+      items: [
+        { href: '/pengajuan-dinas-luar', label: 'Pengajuan Dinas Luar', icon: UploadCloud, roles: ['user', 'admin'] },
+        { href: '/pengajuan-izin-cuti', label: 'Pengajuan Izin Cuti', icon: CalendarCheck, roles: ['user', 'admin'] },
+      ]
+    }
   ];
-
-  const visibleNavItems = navItems.filter(item =>
-    userProfile && item.roles.includes(userProfile.role)
-  );
 
   const handleLogout = async () => {
     try {
@@ -97,22 +113,37 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
           <nav>
             <ul>
-              {visibleNavItems.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <li key={item.label} className="mb-2">
-                    <Link
-                      href={item.href}
-                      className={`flex items-center p-2 text-base font-normal text-gray-900 rounded-lg hover:bg-gray-200 ${
-                        isActive ? 'bg-gray-300' : ''
-                      }`}
-                      onClick={onClose}
-                    >
-                      <item.icon className="w-6 h-6 text-gray-500" />
-                      <span className="ml-3">{item.label}</span>
-                    </Link>
-                  </li>
+              {navGroups.map((group) => {
+                // Filter item di dalam setiap grup berdasarkan role pengguna
+                const visibleItems = group.items.filter(item =>
+                  userProfile && item.roles.includes(userProfile.role)
                 );
+
+                // Hanya tampilkan grup jika ada item yang bisa dilihat oleh pengguna
+                if (visibleItems.length === 0) return null;
+
+                return (
+                  <li key={group.title} className="mb-4">
+                    <h3 className="px-2 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">{group.title}</h3>
+                    <ul>
+                      {visibleItems.map((item) => {
+                        const isActive = pathname === item.href;
+                        return (
+                          <li key={item.label} className="mb-1">
+                            <Link
+                              href={item.href}
+                              className={`flex items-center p-2 text-base font-normal text-gray-900 rounded-lg hover:bg-gray-200 ${isActive ? 'bg-gray-300' : ''}`}
+                              onClick={onClose}
+                            >
+                              <item.icon className="w-6 h-6 text-gray-500" />
+                              <span className="ml-3">{item.label}</span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </li>
+                )
               })}
             </ul>
           </nav>

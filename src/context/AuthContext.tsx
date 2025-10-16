@@ -6,7 +6,7 @@ import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
 // Definisikan tipe untuk profil pengguna, termasuk peran baru
-interface UserProfile {
+export interface UserProfile {
   email: string;
   role: 'admin' | 'user' | 'verificator' | 'supervisor';
 }
