@@ -5,6 +5,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { EditIzinCuti } from "./EditIzinCuti";
 import { DeleteIzinCuti } from "./DeleteIzinCuti";
 
+// PERBAIKI: Tambahkan semua kolom status baru ke interface
 export interface IzinCuti {
   id: number;
   created_at: string;
@@ -17,6 +18,11 @@ export interface IzinCuti {
   TanggalMulai: string;
   TanggalSelesai: string;
   DokumenURL: string;
+  user_id: string;
+  status_verifikator: string | null;
+  alasan_penolakan_verifikator: string | null;
+  status_supervisor: string | null;
+  alasan_penolakan_supervisor: string | null;
 }
 
 const formatDate = (dateString: string) => {
@@ -30,7 +36,6 @@ export function IzinCutiTable({ data, refreshData }: { data: IzinCuti[], refresh
   return (
     <div className="overflow-x-auto">
       <Table>
-        {/* PERBAIKAN: Ganti teks caption */}
         <TableCaption>Daftar Pengajuan Izin Cuti Terbaru</TableCaption>
         <TableHeader>
           <TableRow>

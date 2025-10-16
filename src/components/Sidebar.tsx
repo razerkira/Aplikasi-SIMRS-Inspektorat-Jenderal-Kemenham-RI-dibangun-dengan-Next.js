@@ -8,7 +8,9 @@ import {
   UploadCloud, 
   LayoutDashboard, 
   CalendarOff, 
-  CalendarCheck,
+  CalendarCheck, 
+  ShieldCheck,
+  UserCheck, // Ikon baru untuk persetujuan
   X, 
   LogOut 
 } from 'lucide-react';
@@ -40,12 +42,23 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { userProfile } = useAuth();
 
   const navItems = [
+    // --- Menu Admin ---
     { href: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin'] }, 
     { href: '/manajemen-pegawai', label: 'Manajemen Pegawai', icon: Users, roles: ['admin'] }, 
     { href: '/dinas-luar', label: 'Dinas Luar', icon: Plane, roles: ['admin'] },
     { href: '/izin-cuti', label: 'Izin Cuti', icon: CalendarOff, roles: ['admin'] },
-    { href: '/upload-dokumen', label: 'Upload Dinas Luar', icon: UploadCloud, roles: ['admin', 'user'] },
-    { href: '/upload-izin-cuti', label: 'Upload Izin Cuti', icon: CalendarCheck, roles: ['admin', 'user'] },
+
+    // --- Menu Verifikasi ---
+    { href: '/verifikasi-dinas-luar', label: 'Verifikasi Dinas Luar', icon: ShieldCheck, roles: ['verificator', 'admin'] },
+    { href: '/verifikasi-izin-cuti', label: 'Verifikasi Izin Cuti', icon: ShieldCheck, roles: ['verificator', 'admin'] },
+
+    // --- Menu Persetujuan ---
+    { href: '/persetujuan-dinas-luar', label: 'Persetujuan Dinas Luar', icon: UserCheck, roles: ['supervisor', 'admin'] },
+    { href: '/persetujuan-izin-cuti', label: 'Persetujuan Izin Cuti', icon: UserCheck, roles: ['supervisor', 'admin'] },
+
+    // --- Menu User ---
+    { href: '/pengajuan-dinas-luar', label: 'Pengajuan Dinas Luar', icon: UploadCloud, roles: ['user', 'admin'] },
+    { href: '/pengajuan-izin-cuti', label: 'Pengajuan Izin Cuti', icon: CalendarCheck, roles: ['user', 'admin'] },
   ];
 
   const visibleNavItems = navItems.filter(item =>

@@ -12,8 +12,8 @@ export default function AdminRouteGuard({ children }: { children: React.ReactNod
   useEffect(() => {
     // Jika proses loading selesai dan profil pengguna ada, periksa perannya
     if (!loading && userProfile && userProfile.role !== 'admin') {
-      // Jika bukan admin, tendang ke halaman default user
-      router.push('/upload-dokumen');
+      // PERBAIKAN: Arahkan ke halaman pengajuan, bukan form upload
+      router.push('/pengajuan-dinas-luar');
     }
   }, [userProfile, loading, router]);
 
@@ -29,4 +29,3 @@ export default function AdminRouteGuard({ children }: { children: React.ReactNod
     </div>
   );
 }
-

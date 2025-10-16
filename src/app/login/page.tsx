@@ -1,24 +1,21 @@
-// src/app/login/page.tsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "@/lib/firebase"; // Impor 'db' juga
-import { collection, query, where, getDocs } from "firebase/firestore"; // Impor fungsi Firestore
+import { auth, db } from "@/lib/firebase";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function LoginPage() {
-  // 1. Ganti nama state agar lebih generik
-  const [identifier, setIdentifier] = useState(""); 
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // Tambahkan state loading
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // 2. Tulis ulang fungsi handleLogin
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -27,29 +24,38 @@ export default function LoginPage() {
     try {
       let userEmail = identifier;
 
-      // Cek apakah identifier adalah NIP atau email
       if (!identifier.includes('@')) {
-        // Jika bukan email, anggap sebagai NIP dan cari emailnya di Firestore
         const pegawaiRef = collection(db, "pegawai");
         const q = query(pegawaiRef, where("NIP", "==", identifier));
-        
         const querySnapshot = await getDocs(q);
 
-        if (querySnapshot.empty) {
-          throw new Error("NIP tidak ditemukan.");
-        }
-        
-        // Ambil email dari dokumen yang ditemukan
+        if (querySnapshot.empty) throw new Error("NIP tidak ditemukan.");
         userEmail = querySnapshot.docs[0].data().email;
       }
       
-      // Lanjutkan login dengan email (baik yang diinput langsung atau yang ditemukan)
-      await signInWithEmailAndPassword(auth, userEmail, password);
-      router.push("/");
+      // Dapatkan kredensial pengguna setelah login
+      const userCredential = await signInWithEmailAndPassword(auth, userEmail, password);
+      const user = userCredential.user;
+
+      // Ambil profil pengguna dari Firestore untuk mendapatkan perannya
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const userProfile = userDocSnap.data();
+        // Lakukan redirect berdasarkan peran
+        if (userProfile.role === 'admin') {
+          router.push("/"); // Admin ke Dashboard utama
+        } else {
+          router.push("/pengajuan-dinas-luar"); // User ke halaman pengajuan
+        }
+      } else {
+        // Fallback jika profil tidak ditemukan
+        throw new Error("Profil pengguna tidak ditemukan.");
+      }
 
     } catch (err: any) {
-      // Tangani semua jenis error (NIP tidak ditemukan, password salah, dll)
-      if (err.message === "NIP tidak ditemukan.") {
+      if (err.message.includes("NIP tidak ditemukan") || err.message.includes("Profil pengguna tidak ditemukan")) {
         setError(err.message);
       } else {
         setError("Email/NIP atau password salah. Silakan coba lagi.");
@@ -74,9 +80,8 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleLogin}>
             <div className="grid w-full items-center gap-4">
-              {/* 3. Perbarui input field */}
               <Input
-                type="text" // Ganti type menjadi 'text'
+                type="text"
                 placeholder="Email atau NIP"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}

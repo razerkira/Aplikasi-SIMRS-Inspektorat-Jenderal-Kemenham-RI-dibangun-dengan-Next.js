@@ -1,22 +1,27 @@
-// src/components/DinasLuarTable.tsx
 "use client";
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EditDinasLuar } from "./EditDinasLuar";
 import { DeleteDinasLuar } from "./DeleteDinasLuar";
 
+// PERBAIKI: Tambahkan semua kolom status baru ke interface
 export interface DinasLuar {
   id: number;
   created_at: string;
   NIP: string;
   Nama: string;
   Jabatan: string;
-  Pangkat: string; // Tambahkan Pangkat
+  Pangkat: string;
   UnitKerja: string;
   DeskripsiKegiatan: string;
   TanggalMulai: string;
   TanggalSelesai: string;
   DokumenURL: string;
+  user_id: string;
+  status_verifikator: string | null;
+  alasan_penolakan_verifikator: string | null;
+  status_supervisor: string | null;
+  alasan_penolakan_supervisor: string | null;
 }
 
 const formatDate = (dateString: string) => {
@@ -72,7 +77,7 @@ export function DinasLuarTable({ data, refreshData }: { data: DinasLuar[], refre
             ))
           ) : (
              <TableRow>
-              <TableCell colSpan={10} className="text-center"> {/* Ubah colSpan */}
+              <TableCell colSpan={10} className="text-center">
                 Tidak ada data.
               </TableCell>
             </TableRow>
